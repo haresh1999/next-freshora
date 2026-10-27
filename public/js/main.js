@@ -13,6 +13,6 @@ menuButton.addEventListener('click', () => {
     );
 
     menuIcon.innerHTML = isOpen
-        ? '<path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>'
-        : '<path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18"/>';
+        ? '<path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16"/>'
+        : '<path strokeLinecap="round" strokeLinejoin="round" d="M6 6l12 12M18 6L6 18"/>';
 });

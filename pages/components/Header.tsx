@@ -1,6 +1,7 @@
 import Image from "next/image"
 import Script from "next/script"
 import Link from "next/link"
+import { IoCartOutline } from "react-icons/io5";
 
 export default function Header() {
     return (
@@ -87,9 +88,9 @@ export default function Header() {
                             <svg xmlns="http://www.w3.org/2000/svg"
                                 className="h-5 w-5 shrink-0 text-slate-400"
                                 fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor" stroke-width="1.8">
+                                stroke="currentColor" strokeWidth="1.8">
                                 <circle cx="11" cy="11" r="7" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="m16 16 4 4" />
+                                <path strokeLinecap="round" strokeLinejoin="round" d="m16 16 4 4" />
                             </svg>
                             <input
                                 type="search"
@@ -109,9 +110,9 @@ export default function Header() {
                             className="hidden items-center gap-2 rounded-xl p-2 transition hover:bg-slate-100 sm:flex">
                             <svg xmlns="http://www.w3.org/2000/svg"
                                 className="h-6 w-6 text-slate-700" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7">
+                                viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.7">
                                 <circle cx="12" cy="8" r="3.5" />
-                                <path stroke-linecap="round"
+                                <path strokeLinecap="round"
                                     d="M5 20v-1.5a7 7 0 0114 0V20z" />
                             </svg>
                             <span className="hidden text-sm font-medium xl:block">Account</span>
@@ -121,22 +122,15 @@ export default function Header() {
                             className="relative flex h-10 w-10 items-center justify-center rounded-xl transition hover:bg-slate-100">
                             <svg xmlns="http://www.w3.org/2000/svg"
                                 className="h-6 w-6 text-slate-700" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7">
-                                <path stroke-linecap="round" stroke-linejoin="round"
+                                viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.7">
+                                <path strokeLinecap="round" strokeLinejoin="round"
                                     d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 00-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 00-.1-7.8z" />
                             </svg>
                         </Link>
 
                         <Link href="/cart" aria-label="Shopping Link"
                             className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 transition hover:bg-brand-100">
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                className="h-6 w-6 text-brand-700" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M3 4h2l2.4 11.1a2 2 0 002 1.6h8.8a2 2 0 002-1.6L22 8H6" />
-                                <circle cx="10" cy="20" r="1" />
-                                <circle cx="18" cy="20" r="1" />
-                            </svg>
+                            <IoCartOutline size="1.5rem" />
                             <span id="cartCount"
                                 className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-600 px-1 text-[10px] font-bold text-white">
                                 2
@@ -151,9 +145,9 @@ export default function Header() {
                         <svg xmlns="http://www.w3.org/2000/svg"
                             className="h-5 w-5 shrink-0 text-slate-400"
                             fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor" stroke-width="1.8">
+                            stroke="currentColor" strokeWidth="1.8">
                             <circle cx="11" cy="11" r="7" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m16 16 4 4" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m16 16 4 4" />
                         </svg>
                         <input type="search" name="q"
                             placeholder="Search products, brands..."
@@ -161,9 +155,9 @@ export default function Header() {
                         <button type="submit" aria-label="Search">
                             <svg xmlns="http://www.w3.org/2000/svg"
                                 className="h-5 w-5 text-slate-500" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
                                 <circle cx="11" cy="11" r="7" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="m16 16 4 4" />
+                                <path strokeLinecap="round" strokeLinejoin="round" d="m16 16 4 4" />
                             </svg>
                         </button>
                     </div>
