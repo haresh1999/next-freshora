@@ -9,9 +9,7 @@ export default function App({ Component, pageProps }: AppProps) {
     return (<>
         <Announcement />
         <Header />
-        <main>
-            <Component {...pageProps} />
-        </main>
+        <Component {...pageProps} />
         <Footer />
     </>)
 }
