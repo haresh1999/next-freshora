@@ -2,8 +2,12 @@ import Image from "next/image"
 import Script from "next/script"
 import Link from "next/link"
 import { IoCartOutline } from "react-icons/io5";
+import { useCart } from "@/context/CartContext";
 
 export default function Header() {
+
+    const { openCart, cartCount } = useCart();
+
     return (
         <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-lg">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -35,14 +39,15 @@ export default function Header() {
                         </svg>
                     </button>
                     {/* Freshora Logo */}
-                    <Link href="/" className="flex shrink-0 items-center gap-2.5" />
-                    <Image
-                        src="/logo.png"
-                        alt="Freshora Grocery"
-                        width={200}
-                        height={60}
-                        className="h-10 w-auto object-contain"
-                    />
+                    <Link href="/" className="flex shrink-0 items-center gap-2.5">
+                        <Image
+                            src="/logo.png"
+                            alt="Freshora Grocery"
+                            width={200}
+                            height={60}
+                            className="h-10 w-auto object-contain"
+                        />
+                    </Link>
 
                     <nav className="hidden items-center gap-7 lg:flex">
                         <nav className="hidden items-center gap-7 lg:flex">
@@ -128,15 +133,21 @@ export default function Header() {
                             </svg>
                         </Link>
 
-                        <Link href="/cart" aria-label="Shopping Link"
-                            className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 transition hover:bg-brand-100">
-                            <IoCartOutline size="1.5rem" />
-                            <span id="cartCount"
-                                className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-600 px-1 text-[10px] font-bold text-white">
-                                2
-                            </span>
-                        </Link>
 
+                        <button
+                            type="button"
+                            onClick={openCart}
+                            aria-label={`Open cart with ${cartCount} items`}
+                            className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 transition hover:bg-brand-100"
+                        >
+                            <IoCartOutline size="1.5rem" />
+
+                            {cartCount > 0 && (
+                                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-600 px-1 text-xs font-bold text-white">
+                                    {cartCount}
+                                </span>
+                            )}
+                        </button>
                     </div>
                 </div>
 

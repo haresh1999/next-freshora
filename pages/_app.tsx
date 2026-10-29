@@ -5,11 +5,18 @@ import Announcement from './components/Announcement'
 import Header from './components/Header'
 import Footer from './components/Footer'
 
+import { CartProvider } from "@/context/CartContext";
+import CartSidebar from './components/cart/Cart'
+
 export default function App({ Component, pageProps }: AppProps) {
     return (<>
-        <Announcement />
-        <Header />
-        <Component {...pageProps} />
-        <Footer />
+
+        <CartProvider>
+            <Announcement />
+            <Header />
+            <Component {...pageProps} />
+            <Footer />
+            <CartSidebar />
+        </CartProvider>
     </>)
 }

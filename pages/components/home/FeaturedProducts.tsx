@@ -1,10 +1,13 @@
 import Link from "next/link";
+import Image from "next/image";
+import { useCart } from "@/context/CartContext";
 
 const products = [
     {
         id: 1,
         name: "Fresh Red Apples",
         category: "Fresh Fruits",
+        category_slug: "fresh-Fruits",
         price: 149,
         oldPrice: 180,
         unit: "1 kg",
@@ -16,6 +19,7 @@ const products = [
         id: 2,
         name: "Fresh Organic Milk",
         category: "Dairy & Eggs",
+        category_slug: "dairy-eggs",
         price: 64,
         oldPrice: 72,
         unit: "1 litre",
@@ -27,6 +31,7 @@ const products = [
         id: 3,
         name: "Whole Wheat Bread",
         category: "Bakery",
+        category_slug: "bakery",
         price: 45,
         oldPrice: 55,
         unit: "400 g",
@@ -38,6 +43,7 @@ const products = [
         id: 4,
         name: "Fresh Green Broccoli",
         category: "Vegetables",
+        category_slug: "vegetables",
         price: 79,
         oldPrice: 99,
         unit: "500 g",
@@ -48,6 +54,9 @@ const products = [
 ];
 
 export default function FeaturedProducts() {
+
+    const { addToCart } = useCart();
+
     return (
         <section className="bg-white py-14 sm:py-16 lg:py-10">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -84,12 +93,19 @@ export default function FeaturedProducts() {
                         >
                             {/* Product image */}
                             <div className="relative aspect-square overflow-hidden bg-slate-50">
-                                <img
-                                    src={product.image}
-                                    alt={product.name}
-                                    loading="lazy"
-                                    className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                                />
+                                <Link href={`/product/${product.name
+                                    .trim()
+                                    .toLowerCase()
+                                    .replace(/\s+/g, "-")}`}>
+                                    <Image
+                                        width={284}
+                                        height={284}
+                                        src={product.image}
+                                        alt={product.name || "Product image"}
+                                        loading="lazy"
+                                        className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                                    />
+                                </Link>
 
                                 <span className="absolute left-3 top-3 rounded-full bg-emerald-600 px-2.5 py-1 text-[10px] font-bold text-white sm:text-xs">
                                     {product.badge}
@@ -106,13 +122,19 @@ export default function FeaturedProducts() {
 
                             {/* Product details */}
                             <div className="p-3 sm:p-4">
-                                <p className="text-xs font-medium text-slate-400">
-                                    {product.category}
-                                </p>
-
-                                <h3 className="mt-1 truncate text-sm font-bold text-slate-800 sm:text-base">
-                                    {product.name}
-                                </h3>
+                                <Link href={`/categories/${product.category_slug}`}>
+                                    <p className="text-xs font-medium text-slate-400">
+                                        {product.category}
+                                    </p>
+                                </Link>
+                                <Link href={`/product/${product.name
+                                    .trim()
+                                    .toLowerCase()
+                                    .replace(/\s+/g, "-")}`}>
+                                    <h3 className="mt-1 truncate text-sm font-bold text-slate-800 sm:text-base">
+                                        {product.name}
+                                    </h3>
+                                </Link>
 
                                 <p className="mt-1 text-xs text-slate-500">
                                     {product.unit}
@@ -130,6 +152,20 @@ export default function FeaturedProducts() {
 
                                     <button
                                         type="button"
+                                        onClick={() => {
+                                            addToCart({
+                                                id: product.id,
+                                                name: product.name,
+                                                slug: product.name
+                                                    .trim()
+                                                    .toLowerCase()
+                                                    .replace(/\s+/g, "-"),
+                                                price: product.price,
+                                                image: product.image,
+                                                unit: product.unit,
+                                            })
+                                        }}
+                                        // disabled={product.stock === 0}
                                         aria-label={`Add ${product.name} to cart`}
                                         className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-emerald-200 bg-emerald-50 text-xl font-medium text-emerald-700 transition hover:border-emerald-600 hover:bg-emerald-600 hover:text-white"
                                     >
