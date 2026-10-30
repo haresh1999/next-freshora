@@ -293,7 +293,7 @@ export default function ProductDetails({ product }: PageProps) {
                                             price: product.price,
                                             image: product.image,
                                             unit: product.unit,
-                                        })
+                                        }, quantity)
                                     }}
                                     disabled={product.stock === 0}
                                     className="rounded-xl bg-emerald-600 px-6 py-4 font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
