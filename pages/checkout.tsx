@@ -556,7 +556,7 @@ export default function Checkout() {
                                                 <span className="font-semibold text-emerald-700">
                                                     {deliveryFee === 0
                                                         ? "FREE"
-                                                        : `₹${deliveryFee.toFixed(2)}`}
+                                                        : `₹${deliveryFee}`}
                                                 </span>
                                             </div>
 
