@@ -2,10 +2,15 @@ import HeroSection from "./components/home/HeroSection"
 import CategorySection from "./components/home/CategorySection";
 import FeaturedProducts from "./components/home/FeaturedProducts";
 import FAQSection from "./components/home/FAQSection";
+import Head from "next/head";
 
 export default function Home() {
     return (
         <>
+            <Head>
+                <title>Freshora Home | Your Freshora Home</title>
+                <meta name="description" content="Your Freshora Home." />
+            </Head>
             <HeroSection />
             <div className="rounded-3xl bg-linear-to-br from-brand-50 via-white to-emerald-100 px-6 py-16 text-center sm:px-12">
                 <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-brand-700">

@@ -3,6 +3,7 @@ import Script from "next/script"
 import Link from "next/link"
 import { IoCartOutline } from "react-icons/io5";
 import { useCart } from "@/context/CartContext";
+import { IoPersonOutline } from "react-icons/io5";
 
 export default function Header() {
 
@@ -72,10 +73,7 @@ export default function Header() {
                                 Categories
                             </Link>
 
-                            <Link
-                                href="/deals"
-                                className="text-sm font-medium text-slate-600 transition hover:text-brand-600"
-                            >
+                            <Link href="/deals" className="text-sm font-medium text-slate-600 transition hover:text-brand-600">
                                 Deals
                             </Link>
 
@@ -111,16 +109,12 @@ export default function Header() {
                     </form>
                     <div className="flex shrink-0 items-center gap-1 sm:gap-3">
 
-                        <Link href="/Link"
-                            className="hidden items-center gap-2 rounded-xl p-2 transition hover:bg-slate-100 sm:flex">
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                className="h-6 w-6 text-slate-700" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.7">
-                                <circle cx="12" cy="8" r="3.5" />
-                                <path strokeLinecap="round"
-                                    d="M5 20v-1.5a7 7 0 0114 0V20z" />
-                            </svg>
-                            <span className="hidden text-sm font-medium xl:block">Account</span>
+                        <Link
+                            href="/account"
+                            aria-label="My Account"
+                            className="flex h-10 w-10 items-center justify-center rounded-full text-slate-700 transition hover:bg-emerald-50 hover:text-emerald-700"
+                        >
+                            <IoPersonOutline size="1.4rem" />
                         </Link>
 
                         <Link href="/wishlist" aria-label="Link"
