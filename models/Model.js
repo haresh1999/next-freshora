@@ -1,4 +1,4 @@
-import pool from "@/config/database";
+import pool from "@/lib/db";
 
 class Model {
     constructor(attributes = {}) {

@@ -1,83 +1,30 @@
 import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
+import { apiRequest } from "@/lib/client";
 
-const categories = [
-    {
-        name: "Fruits & Vegetables",
-        slug: "fruits-vegetables",
-        description: "Fresh fruits and farm-picked vegetables.",
-        image:
-            "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80",
-        color: "bg-green-50",
-        count: "Fresh & Natural",
-    },
-    {
-        name: "Dairy & Eggs",
-        slug: "dairy-eggs",
-        description: "Milk, butter, cheese, yogurt and eggs.",
-        image:
-            "https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&w=600&q=80",
-        color: "bg-blue-50",
-        count: "Daily Essentials",
-    },
-    {
-        name: "Grocery & Staples",
-        slug: "grocery-staples",
-        description: "Rice, flour, pulses, oils and spices.",
-        image:
-            "https://images.unsplash.com/photo-1601593768790-7f9b8b7d9c31?auto=format&fit=crop&w=600&q=80",
-        color: "bg-amber-50",
-        count: "Kitchen Essentials",
-    },
-    {
-        name: "Snacks & Beverages",
-        slug: "snacks-beverages",
-        description: "Chips, biscuits, juices and refreshments.",
-        image:
-            "https://images.unsplash.com/photo-1621939514649-280e2aa9f1a7?auto=format&fit=crop&w=600&q=80",
-        color: "bg-orange-50",
-        count: "Tasty Treats",
-    },
-    {
-        name: "Bakery",
-        slug: "bakery",
-        description: "Bread, buns, cookies and baked treats.",
-        image:
-            "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80",
-        color: "bg-yellow-50",
-        count: "Freshly Baked",
-    },
-    {
-        name: "Personal Care",
-        slug: "personal-care",
-        description: "Everyday hygiene and personal care products.",
-        image:
-            "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=600&q=80",
-        color: "bg-pink-50",
-        count: "Self Care",
-    },
-    {
-        name: "Household",
-        slug: "household",
-        description: "Cleaning supplies and home essentials.",
-        image:
-            "https://images.unsplash.com/photo-1563453392212-326f5e854473?auto=format&fit=crop&w=600&q=80",
-        color: "bg-purple-50",
-        count: "Home Essentials",
-    },
-    {
-        name: "Baby Care",
-        slug: "baby-care",
-        description: "Baby care essentials for little ones.",
-        image:
-            "https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=600&q=80",
-        color: "bg-sky-50",
-        count: "For Your Little One",
-    },
-];
+export async function getServerSideProps() {
 
-export default function CategoriesPage() {
+    try {
+        const response = await apiRequest("categories");
+
+        return {
+            props: {
+                categories: response?.data || []
+            }
+        };
+
+    } catch (error) {
+        return {
+            props: {
+                categories: []
+            }
+        };
+    }
+}
+
+export default function CategoriesPage({ categories }) {
+
     return (
         <>
             <Head>

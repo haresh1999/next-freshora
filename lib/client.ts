@@ -1,13 +1,6 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-type ApiOptions = RequestInit & {
-    token?: string;
-};
-
-export async function apiRequest<T>(
-    endpoint: string,
-    options: ApiOptions = {}
-): Promise<T> {
+export async function apiRequest(endpoint, options = {}) {
     if (!API_BASE_URL) {
         throw new Error("API URL is not configured in .env.local");
     }
@@ -20,10 +13,11 @@ export async function apiRequest<T>(
             ...requestOptions,
             headers: {
                 Accept: "application/json",
-                "Content-Type": "application/json",
+                ...(requestOptions.body ? { "Content-Type": "application/json" } : {}),
                 ...(token ? { Authorization: `Bearer ${token}` } : {}),
                 ...headers,
             },
+            cache: options.cache ?? "no-store",
         }
     );
 
@@ -33,8 +27,8 @@ export async function apiRequest<T>(
     }
 
     if (response.status === 204) {
-        return undefined as T;
+        return null;
     }
 
-    return response.json() as Promise<T>;
+    return response.json();
 }

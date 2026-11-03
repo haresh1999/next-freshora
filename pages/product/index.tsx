@@ -1,137 +1,42 @@
 import Head from "next/head";
 import Link from "next/link";
+import Image from "next/image";
 import { useMemo, useState } from "react";
 import { useCart } from "@/context/CartContext";
+import { apiRequest } from "@/lib/client";
 
-type Product = {
-    id: number;
-    name: string;
-    slug: string;
-    category: string;
-    price: number;
-    oldPrice: number;
-    unit: string;
-    image: string;
-    stock: number;
-    rating: number;
-};
+export async function getServerSideProps() {
+    try {
+        const product = await apiRequest("products");
+        const category = await apiRequest("categories");
 
-const products: Product[] = [
-    {
-        id: 1,
-        name: "Fresh Red Apples",
-        slug: "fresh-red-apples",
-        category: "Fruits & Vegetables",
-        price: 149,
-        oldPrice: 180,
-        unit: "1 kg",
-        image:
-            "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=600&q=85",
-        stock: 20,
-        rating: 4.8,
-    },
-    {
-        id: 2,
-        name: "Fresh Broccoli",
-        slug: "fresh-broccoli",
-        category: "Fruits & Vegetables",
-        price: 79,
-        oldPrice: 99,
-        unit: "500 g",
-        image:
-            "https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?auto=format&fit=crop&w=600&q=85",
-        stock: 15,
-        rating: 4.6,
-    },
-    {
-        id: 3,
-        name: "Fresh Milk",
-        slug: "fresh-milk",
-        category: "Dairy & Eggs",
-        price: 64,
-        oldPrice: 72,
-        unit: "1 litre",
-        image:
-            "https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&w=600&q=85",
-        stock: 30,
-        rating: 4.7,
-    },
-    {
-        id: 4,
-        name: "Whole Wheat Bread",
-        slug: "whole-wheat-bread",
-        category: "Bakery",
-        price: 45,
-        oldPrice: 55,
-        unit: "400 g",
-        image:
-            "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=85",
-        stock: 12,
-        rating: 4.5,
-    },
-    {
-        id: 5,
-        name: "Fresh Bananas",
-        slug: "fresh-bananas",
-        category: "Fruits & Vegetables",
-        price: 49,
-        oldPrice: 60,
-        unit: "1 dozen",
-        image:
-            "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=600&q=85",
-        stock: 25,
-        rating: 4.8,
-    },
-    {
-        id: 6,
-        name: "Fresh Orange Juice",
-        slug: "fresh-orange-juice",
-        category: "Snacks & Beverages",
-        price: 99,
-        oldPrice: 120,
-        unit: "1 litre",
-        image:
-            "https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=600&q=85",
-        stock: 18,
-        rating: 4.6,
-    },
-    {
-        id: 7,
-        name: "Organic Carrots",
-        slug: "organic-carrots",
-        category: "Fruits & Vegetables",
-        price: 39,
-        oldPrice: 50,
-        unit: "500 g",
-        image:
-            "https://images.unsplash.com/photo-1445282768818-728615cc910a?auto=format&fit=crop&w=600&q=85",
-        stock: 22,
-        rating: 4.5,
-    },
-    {
-        id: 8,
-        name: "Fresh Strawberries",
-        slug: "fresh-strawberries",
-        category: "Fruits & Vegetables",
-        price: 129,
-        oldPrice: 160,
-        unit: "250 g",
-        image:
-            "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?auto=format&fit=crop&w=600&q=85",
-        stock: 10,
-        rating: 4.9,
-    },
-];
+        return {
+            props: {
+                products: product?.data || [],
+                categories: category?.data?.map((item) => item.name) || [],
+                pro_cats: Object.fromEntries(
+                    (category?.data || []).map((item) => [
+                        item.id,
+                        item.name
+                    ])
+                )
+            }
+        };
 
-const categories = [
-    "All Products",
-    "Fruits & Vegetables",
-    "Dairy & Eggs",
-    "Bakery",
-    "Snacks & Beverages",
-];
+    } catch (error) {
+        console.error("Fetching error:", error);
 
-export default function Product() {
+        return {
+            props: {
+                products: [],
+                categories: [],
+                pro_cats: []
+            }
+        };
+    }
+}
+
+export default function Product({ products, categories, pro_cats }) {
 
     const { addToCart } = useCart();
 
@@ -147,7 +52,7 @@ export default function Product() {
 
             const matchesCategory =
                 category === "All Products" ||
-                product.category === category;
+                pro_cats[product.category_id] === category;
 
             return matchesSearch && matchesCategory;
         });
@@ -297,8 +202,8 @@ export default function Product() {
 
                             {filteredProducts.map((product) => {
                                 const discount = Math.round(
-                                    ((product.oldPrice - product.price) /
-                                        product.oldPrice) *
+                                    ((product.mrp - product.price) /
+                                        product.mrp) *
                                     100
                                 );
 
@@ -310,8 +215,10 @@ export default function Product() {
                                         {/* Product Image */}
                                         <div className="relative aspect-square overflow-hidden bg-slate-50">
                                             <Link href={`/product/${product.slug}`}>
-                                                <img
-                                                    src={product.image}
+                                                <Image
+                                                    width={287}
+                                                    height={287}
+                                                    src={product.img}
                                                     alt={product.name}
                                                     loading="lazy"
                                                     className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
@@ -334,7 +241,7 @@ export default function Product() {
                                         {/* Product Information */}
                                         <div className="p-3 sm:p-4">
                                             <p className="text-xs font-medium text-emerald-700">
-                                                {product.category}
+                                                {pro_cats[product.category_id]}
                                             </p>
 
                                             <Link href={`/product/${product.slug}`}>
@@ -358,7 +265,7 @@ export default function Product() {
                                                     ₹{product.price}
                                                 </span>
                                                 <span className="text-xs text-slate-400 line-through">
-                                                    ₹{product.oldPrice}
+                                                    ₹{product.mrp}
                                                 </span>
                                             </div>
 
@@ -370,7 +277,7 @@ export default function Product() {
                                                     name: product.name,
                                                     slug: product.slug,
                                                     price: product.price,
-                                                    image: product.image,
+                                                    image: product.img,
                                                     unit: product.unit,
                                                 })}
                                                 disabled={product.stock === 0}
