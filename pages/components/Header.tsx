@@ -17,9 +17,10 @@ export default function Header() {
         const checkAuth = async () => {
             try {
                 const response = await apiRequest("/auth", {
+                    method: "POST",
                     cache: "no-store"
                 });
-                setIsLoggedIn(response.authenticated);
+                setIsLoggedIn(response.success);
             } catch {
                 setIsLoggedIn(false);
             }

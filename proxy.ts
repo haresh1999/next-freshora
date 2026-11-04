@@ -10,6 +10,7 @@ export async function proxy(request: NextRequest) {
     const protectedRoutes = [
         "/account",
         "/checkout",
+        "/wishlist",
     ];
 
     const isProtectedRoute = protectedRoutes.some(
@@ -20,6 +21,7 @@ export async function proxy(request: NextRequest) {
     const guestRoutes = [
         "/login",
         "/signup",
+        "/forgot",
     ];
 
     const isGuestRoute = guestRoutes.some(
@@ -69,5 +71,6 @@ export const config = {
         "/checkout/:path*",
         "/login/:path*",
         "/signup/:path*",
+        "/wishlist/:path*",
     ],
 };

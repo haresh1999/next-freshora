@@ -24,17 +24,20 @@ export async function verifyToken(token: string) {
     }
 }
 
-export async function isAuth(request) {
-    const token = request.cookies.get("token")?.value;
-
+export async function getAuthUser(token?: string) {
     if (!token) {
-        return false;
+        return null;
     }
 
-    const user = await verifyToken(token);
-    if (!user) {
-        return false;
+    try {
+        const user = await verifyToken(token);
+        return user || null;
+    } catch {
+        return null;
     }
+}
 
-    return true;
+export async function isAuth(token?: string): Promise<boolean> {
+    const user = await getAuthUser(token);
+    return !!user;
 }
