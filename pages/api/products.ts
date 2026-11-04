@@ -6,6 +6,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     try {
         if (req.method === "POST") {
+
             const data = req.body;
 
             if (!data || !data.name || !data.slug || !data.category || !data.price || !data.mrp || !data.unit || !data.img || !data.stock || !data.rating) {

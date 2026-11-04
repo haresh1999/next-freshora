@@ -1,3 +1,4 @@
+import { apiRequest } from "@/lib/client";
 import Head from "next/head";
 import Link from "next/link";
 import { useState } from "react";
@@ -52,7 +53,7 @@ export default function SignupPage() {
         setLoading(true);
 
         try {
-            const response = await fetch("/api/register", {
+            const response = await apiRequest("/signup", {
                 method: "POST",
                 headers: {
                     Accept: "application/json",
@@ -61,20 +62,21 @@ export default function SignupPage() {
                 body: JSON.stringify(form),
             });
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || "Unable to create your account.");
+            if (response.success) {
+                setSuccess("Your account has been created successfully!");
+                window.location.href = "/login";
+            } else {
+                setError(response.message);
             }
 
-            setSuccess("Your account has been created successfully!");
-
-            // Change this flow if your API requires email/mobile verification.
-            window.location.href = "/login";
         } catch (err) {
-            setError(
-                err instanceof Error ? err.message : "Something went wrong."
-            );
+            if (JSON.parse(err.message).message != "undefined") {
+                setError(JSON.parse(err.message).message);
+            } else {
+                setError(
+                    err instanceof Error ? err.message : "Something went wrong."
+                );
+            }
         } finally {
             setLoading(false);
         }

@@ -3,11 +3,33 @@ import Script from "next/script"
 import Link from "next/link"
 import { IoCartOutline } from "react-icons/io5";
 import { useCart } from "@/context/CartContext";
-import { IoPersonOutline } from "react-icons/io5";
+import AccountMenu from "./AccountMenu";
+import { useEffect, useState } from "react";
+import { apiRequest } from "@/lib/client";
 
 export default function Header() {
 
     const { openCart, cartCount } = useCart();
+
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+    useEffect(() => {
+        const checkAuth = async () => {
+            try {
+                const response = await apiRequest("/auth", {
+                    cache: "no-store"
+                });
+                setIsLoggedIn(response.authenticated);
+            } catch {
+                setIsLoggedIn(false);
+            }
+        };
+        checkAuth();
+        window.addEventListener("auth-changed", checkAuth);
+        return () => {
+            window.removeEventListener("auth-changed", checkAuth);
+        };
+    }, []);
 
     return (
         <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-lg">
@@ -108,40 +130,47 @@ export default function Header() {
                         </div>
                     </form>
                     <div className="flex shrink-0 items-center gap-1 sm:gap-3">
+                        {
+                            isLoggedIn ? (
+                                <>
+                                    <AccountMenu />
+                                    <Link href="/wishlist" aria-label="Link"
+                                        className="relative flex h-10 w-10 items-center justify-center rounded-xl transition hover:bg-slate-100">
+                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                            className="h-6 w-6 text-slate-700" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.7">
+                                            <path strokeLinecap="round" strokeLinejoin="round"
+                                                d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 00-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 00-.1-7.8z" />
+                                        </svg>
+                                    </Link>
 
-                        <Link
-                            href="/account"
-                            aria-label="My Account"
-                            className="flex h-10 w-10 items-center justify-center rounded-full text-slate-700 transition hover:bg-emerald-50 hover:text-emerald-700"
-                        >
-                            <IoPersonOutline size="1.4rem" />
-                        </Link>
+                                </>
+                            ) : (
+                                <>
+                                    <Link
+                                        href="/login"
+                                        className="inline-flex items-center justify-center rounded-full bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-300 hover:bg-emerald-700 hover:shadow-md active:scale-95"
+                                    >
+                                        Login
+                                    </Link>
+                                    <button
+                                        type="button"
+                                        onClick={openCart}
+                                        aria-label={`Open cart with ${cartCount} items`}
+                                        className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 transition hover:bg-brand-100"
+                                    >
+                                        <IoCartOutline size="1.5rem" />
 
-                        <Link href="/wishlist" aria-label="Link"
-                            className="relative flex h-10 w-10 items-center justify-center rounded-xl transition hover:bg-slate-100">
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                className="h-6 w-6 text-slate-700" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.7">
-                                <path strokeLinecap="round" strokeLinejoin="round"
-                                    d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 00-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 00-.1-7.8z" />
-                            </svg>
-                        </Link>
+                                        {cartCount > 0 && (
+                                            <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-600 px-1 text-xs font-bold text-white">
+                                                {cartCount}
+                                            </span>
+                                        )}
+                                    </button>
+                                </>
+                            )
+                        }
 
-
-                        <button
-                            type="button"
-                            onClick={openCart}
-                            aria-label={`Open cart with ${cartCount} items`}
-                            className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 transition hover:bg-brand-100"
-                        >
-                            <IoCartOutline size="1.5rem" />
-
-                            {cartCount > 0 && (
-                                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-600 px-1 text-xs font-bold text-white">
-                                    {cartCount}
-                                </span>
-                            )}
-                        </button>
                     </div>
                 </div>
 

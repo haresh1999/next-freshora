@@ -1,15 +1,16 @@
-
+import { apiRequest } from "@/lib/client";
 import Head from "next/head";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, SubmitEvent } from "react";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+    const router = useRouter();
     const [loginType, setLoginType] = useState<"email" | "mobile">("email");
     const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(true);
     const [form, setForm] = useState({
-        email: "",
-        mobile: "",
+        username: "",
         password: "",
     });
     const [loading, setLoading] = useState(false);
@@ -20,19 +21,21 @@ export default function LoginPage() {
         setForm({ ...form, [e.target.name]: e.target.value });
     }
 
-    async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
         e.preventDefault();
+
         setError("");
         setSuccess("");
         setLoading(true);
 
         try {
-            const payload =
-                loginType === "email"
-                    ? { email: form.email, password: form.password, remember: rememberMe }
-                    : { mobile: form.mobile, password: form.password, remember: rememberMe };
+            const payload = {
+                username: form.username,
+                password: form.password,
+                remember: rememberMe
+            };
 
-            const response = await fetch("/api/login", {
+            const response = await apiRequest("/login", {
                 method: "POST",
                 headers: {
                     Accept: "application/json",
@@ -41,20 +44,30 @@ export default function LoginPage() {
                 body: JSON.stringify(payload),
             });
 
-            const data = await response.json();
+            if (response.success) {
+                setSuccess("Login successful! Redirecting...");
 
-            if (!response.ok) {
-                throw new Error(data.message || "Unable to login. Please try again.");
+                window.dispatchEvent(new Event("auth-changed"));
+
+                router.replace("/account");
+            } else {
+                setError(response.message || "Login failed.");
             }
 
-            setSuccess("Login successful! Redirecting...");
-
-            // Replace with your authenticated account/dashboard route.
-            window.location.href = "/account";
         } catch (err) {
-            setError(
-                err instanceof Error ? err.message : "Something went wrong."
-            );
+            try {
+                const error = JSON.parse(
+                    err instanceof Error ? err.message : String(err)
+                );
+
+                setError(error.message || "Something went wrong.");
+            } catch {
+                setError(
+                    err instanceof Error
+                        ? err.message
+                        : "Something went wrong."
+                );
+            }
         } finally {
             setLoading(false);
         }
@@ -189,8 +202,8 @@ export default function LoginPage() {
                                         </label>
                                         <input
                                             type="email"
-                                            name="email"
-                                            value={form.email}
+                                            name="username"
+                                            value={form.username}
                                             onChange={handleChange}
                                             placeholder="you@example.com"
                                             autoComplete="email"
@@ -209,12 +222,12 @@ export default function LoginPage() {
                                             </span>
                                             <input
                                                 type="tel"
-                                                name="mobile"
-                                                value={form.mobile}
+                                                name="username"
+                                                value={form.username}
                                                 onChange={(e) =>
                                                     setForm({
                                                         ...form,
-                                                        mobile: e.target.value.replace(/\D/g, "").slice(0, 10),
+                                                        username: e.target.value.replace(/\D/g, "").slice(0, 10),
                                                     })
                                                 }
                                                 placeholder="Enter mobile number"
