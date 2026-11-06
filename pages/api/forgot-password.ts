@@ -5,13 +5,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     try {
         if (req.method === 'POST') {
-            const { username } = req.body;
+            const { email, mobile } = req.body;
 
-            const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(username.trim());
-
-            const isMobile = /^\+?[0-9]{10,15}$/.test(username.trim());
-
-            const user = await User.where(isEmail ? "email" : "mobile", username);
+            const user = await User.where('email', email);
 
             if (user.length === 0) {
                 return res.status(401).json({
@@ -20,7 +16,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 });
             }
 
-            // ON SUCCESS GIVE FIELD TO RESET PASSWORD
+            if (user[0].mobile != mobile) {
+                return res.status(401).json({
+                    success: false,
+                    message: "Invalid email/mobile."
+                });
+            }
+
+            return res.status(201).json({
+                success: true,
+                message: 'Verified successfully. You can now reset your password.',
+                user_id: user[0].id
+            });
         }
 
         return res.status(405).json({
@@ -28,7 +35,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             message: "Method not allowed."
         });
 
-    } catch (error) {
+    } catch (error: any) {
 
         return res.status(400).json({
             success: false,

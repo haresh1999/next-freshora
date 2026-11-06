@@ -70,13 +70,11 @@ export default function SignupPage() {
             }
 
         } catch (err) {
-            if (JSON.parse(err.message).message != "undefined") {
-                setError(JSON.parse(err.message).message);
-            } else {
-                setError(
-                    err instanceof Error ? err.message : "Something went wrong."
-                );
-            }
+            setError(
+                err instanceof Error
+                    ? err.message
+                    : "Something went wrong."
+            );
         } finally {
             setLoading(false);
         }

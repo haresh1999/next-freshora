@@ -39,16 +39,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 message: "Categories fetched successfully."
             });
         }
-    } catch (error) {
+
+        return res.status(405).json({
+            success: false,
+            message: "Method not allowed."
+        });
+    } catch (error: any) {
 
         return res.status(400).json({
             success: false,
             message: error.message || "Something went wrong."
         });
     }
-
-    return res.status(405).json({
-        success: false,
-        message: "Method not allowed."
-    });
 }

@@ -21,14 +21,15 @@ export async function apiRequest(endpoint, options = {}) {
         }
     );
 
-    if (!response.ok) {
-        const message = await response.text();
-        throw new Error(message || `API error: ${response.status}`);
-    }
-
     if (response.status === 204) {
         return null;
     }
 
-    return response.json();
+    const data = await response.json();
+
+    if (!response.ok || data.success === false) {
+        throw new Error(data.message || `API error: ${response.status}`);
+    }
+
+    return data;
 }

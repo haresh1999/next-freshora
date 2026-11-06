@@ -68,8 +68,7 @@ export default async function handler(
             message: "Your enquiry was received successfully!",
             data: result,
         });
-    } catch (error) {
-        console.error("Contact API error:", error);
+    } catch (error: any) {
 
         return res.status(500).json({
             success: false,

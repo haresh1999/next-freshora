@@ -2,7 +2,6 @@ import User from "@/models/User";
 import { NextApiRequest, NextApiResponse } from "next";
 import bcrypt from "bcryptjs";
 import { generateToken } from "@/lib/auth";
-import { serialize } from "cookie";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
@@ -85,7 +84,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(405).json({
             message: "Method not allowed"
         });
-    } catch (error) {
+    } catch (error: any) {
 
         return res.status(400).json({
             success: false,

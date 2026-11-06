@@ -69,7 +69,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             message: "Method not allowed"
         });
 
-    } catch (error) {
+    } catch (error: any) {
 
         return res.status(400).json({
             success: false,

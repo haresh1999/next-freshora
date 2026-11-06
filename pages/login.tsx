@@ -55,19 +55,11 @@ export default function LoginPage() {
             }
 
         } catch (err) {
-            try {
-                const error = JSON.parse(
-                    err instanceof Error ? err.message : String(err)
-                );
-
-                setError(error.message || "Something went wrong.");
-            } catch {
-                setError(
-                    err instanceof Error
-                        ? err.message
-                        : "Something went wrong."
-                );
-            }
+            setError(
+                err instanceof Error
+                    ? err.message
+                    : "Something went wrong."
+            );
         } finally {
             setLoading(false);
         }

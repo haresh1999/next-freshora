@@ -32,8 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
         });
 
-    } catch (error) {
-        console.error("Auth API error:", error);
+    } catch (error: any) {
 
         return res.status(500).json({
             success: false,
