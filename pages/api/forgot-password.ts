@@ -1,3 +1,4 @@
+import { errorResponse, unknownMethod } from "@/lib/client";
 import User from "@/models/User";
 import { NextApiRequest, NextApiResponse } from "next";
 
@@ -7,7 +8,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (req.method === 'POST') {
             const { email, mobile } = req.body;
 
-            const user = await User.where('email', email);
+            const user = await User.where({ 'email': email });
 
             if (user.length === 0) {
                 return res.status(401).json({
@@ -30,20 +31,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             });
         }
 
-        return res.status(405).json({
-            success: false,
-            message: "Method not allowed."
-        });
+        return unknownMethod(res);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const message =
+            error instanceof Error
+                ? error.message
+                : "Something went wrong.";
 
-        return res.status(400).json({
-            success: false,
-            message: error.message || "Something went wrong."
-        });
+        return errorResponse(res, message);
     }
-
-    return res.status(405).json({
-        message: "Method not allowed"
-    });
 }

@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import User from '../../models/User';
 import bcrypt from "bcryptjs";
+import { errorResponse, unknownMethod } from "@/lib/client";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 
@@ -25,7 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 });
             }
 
-            const user = await User.where("email", data.email);
+            const user = await User.where({ "email": data.email });
 
             if (user.length > 0) {
                 return res.status(422).json({
@@ -37,7 +38,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 });
             }
 
-            const mobile = await User.where("mobile", data.mobile);
+            const mobile = await User.where({ "mobile": data.mobile });
 
             if (mobile.length > 0) {
                 return res.status(422).json({
@@ -65,15 +66,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             });
         }
 
-        return res.status(405).json({
-            message: "Method not allowed"
-        });
+        return unknownMethod(res);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const message =
+            error instanceof Error
+                ? error.message
+                : "Something went wrong.";
 
-        return res.status(400).json({
-            success: false,
-            message: error.message || "Something went wrong."
-        });
+        return errorResponse(res, message);
     }
 }

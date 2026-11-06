@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import pool from "@/lib/db";
+import { errorResponse, unknownMethod } from "@/lib/client";
 
 export default async function handler(
     req: NextApiRequest,
@@ -7,11 +8,7 @@ export default async function handler(
 ) {
     // 1. Only allow POST requests
     if (req.method !== "POST") {
-        res.setHeader("Allow", ["POST"]);
-        return res.status(405).json({
-            success: false,
-            message: `Method ${req.method} not allowed`,
-        });
+        return unknownMethod(res);
     }
 
     try {
@@ -68,11 +65,12 @@ export default async function handler(
             message: "Your enquiry was received successfully!",
             data: result,
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const message =
+            error instanceof Error
+                ? error.message
+                : "Something went wrong.";
 
-        return res.status(500).json({
-            success: false,
-            message: "Unable to submit contact form.",
-        });
+        return errorResponse(res, message);
     }
 }

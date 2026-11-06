@@ -1,93 +1,69 @@
-
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useCart } from "@/context/CartContext";
+import { apiRequest } from "@/lib/client";
+import type { GetServerSideProps } from "next";
 
 type WishlistProduct = {
     id: number;
     name: string;
     slug: string;
-    category: string;
+    category: number;
     price: number;
     oldPrice: number;
     unit: string;
     image: string;
 };
 
-const initialProducts: WishlistProduct[] = [
-    {
-        id: 1,
-        name: "Fresh Red Apples",
-        slug: "fresh-red-apples",
-        category: "Fruits",
-        price: 149,
-        oldPrice: 199,
-        unit: "1 kg",
-        image:
-            "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=700&q=85",
-    },
-    {
-        id: 2,
-        name: "Fresh Organic Milk",
-        slug: "fresh-organic-milk",
-        category: "Dairy",
-        price: 55,
-        oldPrice: 70,
-        unit: "1 Litre",
-        image:
-            "https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&w=700&q=85",
-    },
-    {
-        id: 3,
-        name: "Fresh Strawberries",
-        slug: "fresh-strawberries",
-        category: "Fruits",
-        price: 99,
-        oldPrice: 149,
-        unit: "250 g",
-        image:
-            "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?auto=format&fit=crop&w=700&q=85",
-    },
-];
+type PageProps = {
+    wishlists: WishlistProduct[];
+};
 
-export default function Wishlist() {
+export const getServerSideProps: GetServerSideProps<PageProps> = async ({ req }) => {
+    try {
+        const response = await apiRequest("/wishlist", {
+            method: "GET",
+            headers: {
+                Cookie: req.headers.cookie || "",
+            },
+        });
 
-    const { addToCart } = useCart();
+        return {
+            props: {
+                wishlists: response?.data ?? [],
+            },
+        };
 
-    const [wishlist, setWishlist] = useState<WishlistProduct[]>([]);
-    const [loaded, setLoaded] = useState(false);
+    } catch (error) {
+        return {
+            props: {
+                wishlists: [],
+            },
+        };
+    }
+};
+
+export default function Wishlist({ wishlists }: PageProps) {
+
+    const [wishlist, setWishlist] = useState(wishlists);
+
+    const { addToCart, subtotal } = useCart();
     const [addedProduct, setAddedProduct] = useState<number | null>(null);
 
-    // Load wishlist from browser storage
-    useEffect(() => {
-        try {
-            const savedWishlist = localStorage.getItem("freshora-wishlist");
+    async function removeProduct(id: number) {
 
-            if (savedWishlist) {
-                setWishlist(JSON.parse(savedWishlist));
-            } else {
-                setWishlist(initialProducts);
-            }
-        } catch {
-            setWishlist(initialProducts);
+        const response = await apiRequest('/wishlist', {
+            method: 'POST',
+            body: JSON.stringify({ product_id: id, remove: true })
+        });
+
+        if (response.success) {
+            setWishlist(response.data);
+        } else {
+            alert(response.message);
         }
-
-        setLoaded(true);
-    }, []);
-
-    // Save wishlist whenever it changes
-    useEffect(() => {
-        if (loaded) {
-            localStorage.setItem("freshora-wishlist", JSON.stringify(wishlist));
-        }
-    }, [wishlist, loaded]);
-
-    function removeProduct(id: number) {
-        setWishlist((previous) =>
-            previous.filter((product) => product.id !== id)
-        );
     }
 
     function addProductToCart(product: WishlistProduct) {
@@ -123,14 +99,7 @@ export default function Wishlist() {
         });
     }
 
-    const totalValue = wishlist.reduce(
-        (total, product) => total + product.price,
-        0
-    );
-
-    if (!loaded) {
-        return <div className="min-h-[50vh] bg-slate-50" />;
-    }
+    const totalValue = subtotal;
 
     return (
         <>
@@ -144,7 +113,7 @@ export default function Wishlist() {
 
             <main className="min-h-screen bg-slate-50 pb-16">
                 {/* Hero */}
-                <section className="bg-gradient-to-br from-emerald-950 via-emerald-800 to-green-700">
+                <section className="bg-linear-to-br from-emerald-950 via-emerald-800 to-green-700">
                     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
                         <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
                             <div>

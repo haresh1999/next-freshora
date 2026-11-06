@@ -1,3 +1,5 @@
+import type { NextApiResponse } from "next";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export async function apiRequest(endpoint, options = {}) {
@@ -32,4 +34,18 @@ export async function apiRequest(endpoint, options = {}) {
     }
 
     return data;
+}
+
+export function unknownMethod(res: NextApiResponse) {
+    return res.status(405).json({
+        success: false,
+        message: "Method not allowed",
+    });
+}
+
+export function errorResponse(res: NextApiResponse, message: string, statusCode = 500) {
+    return res.status(statusCode).json({
+        success: false,
+        message: message,
+    });
 }

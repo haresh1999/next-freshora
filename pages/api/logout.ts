@@ -1,12 +1,10 @@
+import { unknownMethod } from "@/lib/client";
 import { NextApiRequest, NextApiResponse } from "next";
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     if (req.method !== "POST") {
-        return res.status(405).json({
-            success: false,
-            message: "Method not allowed."
-        });
+        return unknownMethod(res);
     }
 
     res.setHeader("Set-Cookie", [

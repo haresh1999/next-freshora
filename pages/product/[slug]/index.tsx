@@ -5,6 +5,7 @@ import { useState } from "react";
 import type { GetServerSideProps } from "next";
 import PincodeChecker from "@/pages/components/products/PincodeChecker";
 import { useCart } from "@/context/CartContext";
+import { apiRequest } from "@/lib/client";
 
 type Product = {
     id: number;
@@ -12,78 +13,83 @@ type Product = {
     slug: string;
     category: string;
     price: number;
-    oldPrice: number;
+    mrp: number;
     unit: string;
     description: string;
-    image: string;
+    img: string;
     images: string[];
     rating: number;
     reviews: number;
     stock: number;
 };
 
-const products: Product[] = [
-    {
-        id: 1,
-        name: "Fresh Red Apples",
-        slug: "fresh-red-apples",
-        category: "Fruits & Vegetables",
-        price: 149,
-        oldPrice: 180,
-        unit: "1 kg",
-        description:
-            "Enjoy crisp, juicy red apples selected for everyday freshness. Perfect for snacking, fruit salads, breakfast, and healthy recipes.",
-        image:
-            "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=900&q=85",
-        images: [
-            "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=900&q=85",
-            "https://images.unsplash.com/photo-1570913149827-d2ac84ab3f9a?auto=format&fit=crop&w=900&q=85",
-        ],
-        rating: 4.8,
-        reviews: 124,
-        stock: 20,
-    },
-    {
-        id: 2,
-        name: "Fresh Green Broccoli",
-        slug: "fresh-green-broccoli",
-        category: "Fruits & Vegetables",
-        price: 79,
-        oldPrice: 99,
-        unit: "500 g",
-        description:
-            "Fresh green broccoli for salads, stir-fries, soups, and wholesome home-cooked meals.",
-        image:
-            "https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?auto=format&fit=crop&w=900&q=85",
-        images: [
-            "https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?auto=format&fit=crop&w=900&q=85",
-        ],
-        rating: 4.6,
-        reviews: 86,
-        stock: 15,
-    },
-];
-
 type PageProps = {
     product: Product | null;
+    products: Product[];
 };
 
-export const getServerSideProps: GetServerSideProps<PageProps> = async ({ params, }) => {
+export const getServerSideProps: GetServerSideProps<PageProps> = async ({ params }) => {
     const slug = params?.slug;
-    const product =
-        typeof slug === "string"
-            ? products.find((item) => item.slug === slug) ?? null
-            : null;
-    return {
-        props: { product },
-    };
+
+    if (typeof slug !== "string") {
+        return {
+            props: {
+                product: null,
+                products: [],
+            },
+        };
+    }
+
+    try {
+        const response = await apiRequest(
+            `/product_show?slug=${encodeURIComponent(slug)}`,
+            { method: "GET" }
+        );
+
+        const product = response?.data ?? null;
+
+        if (!product) {
+            return {
+                props: {
+                    product: null,
+                    products: [],
+                },
+            };
+        }
+
+        const productsResponse = await apiRequest(
+            `/cats_products?category=${product.category_id}`,
+            { method: "GET" }
+        );
+
+        const products = productsResponse?.data ?? [];
+
+        return {
+            props: {
+                product,
+                products,
+            },
+        };
+
+    } catch (error) {
+        console.error("Product details error:", error);
+
+        return {
+            props: {
+                product: null,
+                products: [],
+            },
+        };
+    }
 };
 
-export default function ProductDetails({ product }: PageProps) {
+export default function ProductDetails({ product, products }: PageProps) {
 
     const [quantity, setQuantity] = useState(1);
     const [activeImage, setActiveImage] = useState(0);
     const [added, setAdded] = useState(false);
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
 
     const { addToCart } = useCart();
 
@@ -108,10 +114,43 @@ export default function ProductDetails({ product }: PageProps) {
     }
 
     const discount = Math.round(
-        ((product.oldPrice - product.price) / product.oldPrice) * 100
+        ((product.mrp - product.price) / product.mrp) * 100
     );
 
+    async function addWishList(product_id: number): Promise<void> {
+        try {
+            setError("");
+            setSuccess("");
+
+            const response = await apiRequest("/wishlist", {
+                method: "POST",
+                body: JSON.stringify({ product_id }),
+            });
+
+            if (response.success) {
+                setSuccess(response.message || "Product added to wishlist successfully.");
+            } else {
+                setError(response.message || "Failed to add product to wishlist.");
+            }
+
+            setTimeout(() => {
+                setSuccess("");
+                setError("");
+            }, 3000);
+
+        } catch (error: unknown) {
+            setError(
+                error instanceof Error
+                    ? error.message
+                    : "Something went wrong."
+            );
+
+            setTimeout(() => setError(""), 3000);
+        }
+    }
+
     return (
+
         <>
             <Head>
                 <title>{product.name} | Freshora</title>
@@ -139,12 +178,13 @@ export default function ProductDetails({ product }: PageProps) {
                         <div>
                             <div className="relative aspect-square overflow-hidden rounded-2xl bg-emerald-50">
                                 <Image
-                                    src={product.images[activeImage] ?? product.image}
+                                    src={product.img}
                                     alt={product.name}
                                     fill
                                     priority
                                     sizes="(max-width: 1024px) 100vw, 50vw"
                                     className="object-cover"
+                                    loading={'eager'}
                                 />
 
                                 <span className="absolute left-4 top-4 rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white">
@@ -153,7 +193,7 @@ export default function ProductDetails({ product }: PageProps) {
                             </div>
 
                             <div className="mt-4 flex gap-3">
-                                {product.images.map((image, index) => (
+                                {[product.img].map((image, index) => (
                                     <button
                                         key={image}
                                         type="button"
@@ -170,6 +210,7 @@ export default function ProductDetails({ product }: PageProps) {
                                             fill
                                             sizes="80px"
                                             className="object-cover"
+                                            loading={'eager'}
                                         />
                                     </button>
                                 ))}
@@ -201,10 +242,10 @@ export default function ProductDetails({ product }: PageProps) {
                                     ₹{product.price}
                                 </span>
                                 <span className="pb-1 text-lg text-slate-400 line-through">
-                                    ₹{product.oldPrice}
+                                    ₹{product.mrp}
                                 </span>
                                 <span className="pb-1 text-sm font-semibold text-emerald-700">
-                                    Save ₹{product.oldPrice - product.price}
+                                    Save ₹{product.mrp - product.price}
                                 </span>
                             </div>
 
@@ -279,6 +320,24 @@ export default function ProductDetails({ product }: PageProps) {
 
                             <PincodeChecker />
 
+                            {error && (
+                                <div
+                                    role="alert"
+                                    className="rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-700 mt-5"
+                                >
+                                    {error}
+                                </div>
+                            )}
+
+                            {success && (
+                                <div
+                                    role="status"
+                                    className="rounded-xl bg-emerald-50 px-4 py-4 text-sm leading-6 text-emerald-800 mt-4"
+                                >
+                                    {success}
+                                </div>
+                            )}
+
                             <div className="mt-6 grid gap-3 sm:grid-cols-2">
                                 <button
                                     type="button"
@@ -291,7 +350,7 @@ export default function ProductDetails({ product }: PageProps) {
                                                 .toLowerCase()
                                                 .replace(/\s+/g, "-"),
                                             price: product.price,
-                                            image: product.image,
+                                            image: product.img,
                                             unit: product.unit,
                                         }, quantity)
                                     }}
@@ -303,10 +362,10 @@ export default function ProductDetails({ product }: PageProps) {
 
                                 <button
                                     type="button"
-                                    onClick={() => setAdded(false)}
+                                    onClick={() => addWishList(product.id)}
                                     className="rounded-xl border border-emerald-600 px-6 py-4 font-semibold text-emerald-700 transition hover:bg-emerald-50"
                                 >
-                                    {added ? 'Add to Wishlist' : 'Added In Wishlist'}
+                                    Add to Wishlist
                                 </button>
                             </div>
 
@@ -366,34 +425,33 @@ export default function ProductDetails({ product }: PageProps) {
                         </div>
 
                         <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                            {products
-                                .filter((item) => item.id !== product.id)
-                                .map((item) => (
-                                    <Link
-                                        key={item.id}
-                                        href={`/product/${item.slug}`}
-                                        className="rounded-2xl border border-slate-100 bg-white p-3 transition hover:-translate-y-1 hover:shadow-lg sm:p-4"
-                                    >
-                                        <div className="relative aspect-square overflow-hidden rounded-xl bg-slate-50">
-                                            <Image
-                                                src={item.image}
-                                                alt={item.name}
-                                                fill
-                                                sizes="(max-width: 640px) 50vw, 25vw"
-                                                className="object-cover"
-                                            />
-                                        </div>
-                                        <h3 className="mt-3 font-semibold text-slate-800">
-                                            {item.name}
-                                        </h3>
-                                        <p className="mt-2 font-bold text-emerald-700">
-                                            ₹{item.price}
-                                            <span className="ml-2 text-xs font-normal text-slate-400 line-through">
-                                                ₹{item.oldPrice}
-                                            </span>
-                                        </p>
-                                    </Link>
-                                ))}
+                            {products.map((item) => (
+                                <Link
+                                    key={item.id}
+                                    href={`/product/${item.slug}`}
+                                    className="rounded-2xl border border-slate-100 bg-white p-3 transition hover:-translate-y-1 hover:shadow-lg sm:p-4"
+                                >
+                                    <div className="relative aspect-square overflow-hidden rounded-xl bg-slate-50">
+                                        <Image
+                                            src={item.img}
+                                            alt={item.name}
+                                            fill
+                                            sizes="(max-width: 640px) 50vw, 25vw"
+                                            className="object-cover"
+                                            loading={'eager'}
+                                        />
+                                    </div>
+                                    <h3 className="mt-3 font-semibold text-slate-800">
+                                        {item.name}
+                                    </h3>
+                                    <p className="mt-2 font-bold text-emerald-700">
+                                        ₹{item.price}
+                                        <span className="ml-2 text-xs font-normal text-slate-400 line-through">
+                                            ₹{item.mrp}
+                                        </span>
+                                    </p>
+                                </Link>
+                            ))}
                         </div>
                     </section>
                 </div>

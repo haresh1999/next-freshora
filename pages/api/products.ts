@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import Product from "../../models/Product";
 import Category from "../../models/Category";
+import { errorResponse, unknownMethod } from "@/lib/client";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 
@@ -16,7 +17,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 });
             }
 
-            const category = await Category.where('name', data.category)
+            const category = await Category.where({ 'name': data.category })
 
             if (!category) {
                 return res.status(400).json({
@@ -54,15 +55,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             });
         }
 
-        return res.status(405).json({
-            message: "Method not allowed"
-        });
+        return unknownMethod(res);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const message =
+            error instanceof Error
+                ? error.message
+                : "Something went wrong.";
 
-        return res.status(400).json({
-            success: false,
-            message: error.message || "Something went wrong."
-        });
+        return errorResponse(res, message);
     }
 }
