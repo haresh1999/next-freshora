@@ -4,40 +4,75 @@ import Image from "next/image";
 import { useMemo, useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { apiRequest } from "@/lib/client";
+import type { GetServerSideProps } from "next";
 
-export async function getServerSideProps() {
+type Product = {
+    id: number;
+    name: string;
+    slug: string;
+    category_id: number;
+    price: number;
+    mrp: number;
+    unit: string;
+    description: string;
+    img: string;
+    badge: string;
+    rating: number;
+    reviews: number;
+    stock: number;
+};
+
+type Category = {
+    id: number;
+    name: string;
+    slug: string;
+    image: string;
+    color: string;
+    description: string;
+};
+
+type PageProps = {
+    products: Product[];
+    categories: Category[];
+    pro_cats: Record<number, string>; // Maps category ID -> category Name
+};
+
+export const getServerSideProps: GetServerSideProps<PageProps> = async () => {
     try {
-        const product = await apiRequest("products");
-        const category = await apiRequest("categories");
+        const [productRes, categoryRes] = await Promise.all([
+            apiRequest("products"),
+            apiRequest("categories"),
+        ]);
+
+        const pros: Product[] = productRes?.data || [];
+        const cats: Category[] = categoryRes?.data || [];
 
         return {
             props: {
-                products: product?.data || [],
-                categories: category?.data?.map((item) => item.name) || [],
+                products: pros,
+                categories: cats,
                 pro_cats: Object.fromEntries(
-                    (category?.data || []).map((item) => [
-                        item.id,
-                        item.name
-                    ])
-                )
-            }
+                    cats.map((item) => [item.id, item.name])
+                ),
+            },
         };
-
     } catch (error) {
-        console.error("Fetching error:", error);
-
+        console.error("Fetching error in getServerSideProps:", error);
         return {
             props: {
                 products: [],
                 categories: [],
-                pro_cats: []
-            }
+                pro_cats: {},
+            },
         };
     }
-}
+};
 
-export default function Product({ products, categories, pro_cats }) {
-
+export default function Product({
+    products = [],
+    categories = [],
+    pro_cats = {},
+}: PageProps) {
     const { addToCart } = useCart();
 
     const [search, setSearch] = useState("");
@@ -48,7 +83,7 @@ export default function Product({ products, categories, pro_cats }) {
         let result = products.filter((product) => {
             const matchesSearch = product.name
                 .toLowerCase()
-                .includes(search.toLowerCase());
+                .includes(search.toLowerCase().trim());
 
             const matchesCategory =
                 category === "All Products" ||
@@ -68,7 +103,7 @@ export default function Product({ products, categories, pro_cats }) {
         }
 
         return result;
-    }, [search, category, sort]);
+    }, [products, search, category, sort, pro_cats]);
 
     return (
         <>
@@ -81,7 +116,6 @@ export default function Product({ products, categories, pro_cats }) {
             </Head>
 
             <div className="min-h-screen bg-slate-50">
-
                 {/* Page Hero */}
                 <section className="bg-emerald-700 px-4 py-14 text-white sm:py-20">
                     <div className="mx-auto max-w-7xl">
@@ -94,8 +128,8 @@ export default function Product({ products, categories, pro_cats }) {
                         </h1>
 
                         <p className="mt-4 max-w-xl text-sm leading-7 text-emerald-50 sm:text-base">
-                            Discover fresh fruits, vegetables, dairy and everyday
-                            essentials. Everything you need in one place.
+                            Discover fresh fruits, vegetables, dairy and everyday essentials.
+                            Everything you need in one place.
                         </p>
 
                         <div className="mt-6 flex flex-wrap gap-5 text-sm font-medium">
@@ -107,23 +141,19 @@ export default function Product({ products, categories, pro_cats }) {
                 </section>
 
                 <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-
                     {/* Breadcrumb */}
                     <div className="mb-7 flex items-center gap-2 text-sm text-slate-500">
                         <Link href="/" className="hover:text-emerald-700">
                             Home
                         </Link>
                         <span>/</span>
-                        <span className="font-semibold text-slate-800">
-                            Products
-                        </span>
+                        <span className="font-semibold text-slate-800">Products</span>
                     </div>
 
                     {/* Search and Filter */}
                     <div className="mb-8 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:p-5">
                         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-
-                            {/* Search */}
+                            {/* Search input */}
                             <div className="relative w-full lg:max-w-md">
                                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg text-slate-400">
                                     ⌕
@@ -138,21 +168,21 @@ export default function Product({ products, categories, pro_cats }) {
                                 />
                             </div>
 
-                            {/* Category */}
+                            {/* Category dropdown & Sorting */}
                             <div className="flex flex-col gap-3 sm:flex-row">
                                 <select
                                     value={category}
                                     onChange={(e) => setCategory(e.target.value)}
                                     className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-emerald-500"
                                 >
-                                    {categories.map((item) => (
-                                        <option key={item} value={item}>
-                                            {item}
+                                    <option value="All Products">All Products</option>
+                                    {categories.map((cat) => (
+                                        <option key={cat.id} value={cat.name}>
+                                            {cat.name}
                                         </option>
                                     ))}
                                 </select>
 
-                                {/* Sorting */}
                                 <select
                                     value={sort}
                                     onChange={(e) => setSort(e.target.value)}
@@ -168,17 +198,27 @@ export default function Product({ products, categories, pro_cats }) {
 
                         {/* Category chips */}
                         <div className="mt-5 flex gap-2 overflow-x-auto pb-1">
-                            {categories.map((item) => (
+                            <button
+                                type="button"
+                                onClick={() => setCategory("All Products")}
+                                className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium transition ${category === "All Products"
+                                    ? "bg-emerald-600 text-white"
+                                    : "bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700"
+                                    }`}
+                            >
+                                All Products
+                            </button>
+                            {categories.map((cat) => (
                                 <button
-                                    key={item}
+                                    key={cat.id}
                                     type="button"
-                                    onClick={() => setCategory(item)}
-                                    className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium transition ${category === item
+                                    onClick={() => setCategory(cat.name)}
+                                    className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium transition ${category === cat.name
                                         ? "bg-emerald-600 text-white"
                                         : "bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700"
                                         }`}
                                 >
-                                    {item}
+                                    {cat.name}
                                 </button>
                             ))}
                         </div>
@@ -199,13 +239,13 @@ export default function Product({ products, categories, pro_cats }) {
                     {/* Product Grid */}
                     {filteredProducts.length > 0 ? (
                         <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
-
                             {filteredProducts.map((product) => {
-                                const discount = Math.round(
-                                    ((product.mrp - product.price) /
-                                        product.mrp) *
-                                    100
-                                );
+                                const discount =
+                                    product.mrp > product.price
+                                        ? Math.round(
+                                            ((product.mrp - product.price) / product.mrp) * 100
+                                        )
+                                        : 0;
 
                                 return (
                                     <div
@@ -225,9 +265,11 @@ export default function Product({ products, categories, pro_cats }) {
                                                 />
                                             </Link>
 
-                                            <span className="absolute left-3 top-3 rounded-full bg-emerald-600 px-2.5 py-1 text-xs font-bold text-white">
-                                                {discount}% OFF
-                                            </span>
+                                            {discount > 0 && (
+                                                <span className="absolute left-3 top-3 rounded-full bg-emerald-600 px-2.5 py-1 text-xs font-bold text-white">
+                                                    {discount}% OFF
+                                                </span>
+                                            )}
 
                                             <Link
                                                 href={`/product/${product.slug}`}
@@ -241,7 +283,7 @@ export default function Product({ products, categories, pro_cats }) {
                                         {/* Product Information */}
                                         <div className="p-3 sm:p-4">
                                             <p className="text-xs font-medium text-emerald-700">
-                                                {pro_cats[product.category_id]}
+                                                {pro_cats[product.category_id] || "General"}
                                             </p>
 
                                             <Link href={`/product/${product.slug}`}>
@@ -264,27 +306,36 @@ export default function Product({ products, categories, pro_cats }) {
                                                 <span className="text-lg font-bold text-slate-900">
                                                     ₹{product.price}
                                                 </span>
-                                                <span className="text-xs text-slate-400 line-through">
-                                                    ₹{product.mrp}
-                                                </span>
+                                                {product.mrp > product.price && (
+                                                    <span className="text-xs text-slate-400 line-through">
+                                                        ₹{product.mrp}
+                                                    </span>
+                                                )}
                                             </div>
 
                                             {/* Add to Cart */}
                                             <button
                                                 type="button"
-                                                onClick={() => addToCart({
-                                                    id: product.id,
-                                                    name: product.name,
-                                                    slug: product.slug,
-                                                    price: product.price,
-                                                    image: product.img,
-                                                    unit: product.unit,
-                                                })}
+                                                onClick={() =>
+                                                    addToCart({
+                                                        id: product.id,
+                                                        name: product.name,
+                                                        slug: product.slug,
+                                                        price: product.price,
+                                                        image: product.img,
+                                                        unit: product.unit,
+                                                    })
+                                                }
                                                 disabled={product.stock === 0}
                                                 className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-3 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
                                             >
-                                                <span>+</span>
-                                                Add to Cart
+                                                {product.stock === 0 ? (
+                                                    "Out of Stock"
+                                                ) : (
+                                                    <>
+                                                        <span>+</span> Add to Cart
+                                                    </>
+                                                )}
                                             </button>
                                         </div>
                                     </div>
@@ -316,7 +367,6 @@ export default function Product({ products, categories, pro_cats }) {
                             </button>
                         </div>
                     )}
-
                 </div>
             </div>
         </>

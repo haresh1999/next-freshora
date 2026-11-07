@@ -1,7 +1,20 @@
 import Link from "next/link";
 import Image from "next/image";
 
-export default function CategorySection({ categories }) {
+type Category = {
+    id: number;
+    name: string;
+    slug: string;
+    image: string;
+    color: string;
+    description: string;
+};
+
+type PageProps = {
+    categories: Category[];
+};
+
+export default function CategorySection({ categories = [] }: PageProps) {
     return (
         <section className="bg-white py-14 sm:py-16 lg:py-10">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

@@ -26,6 +26,9 @@ type Category = {
     id: number;
     name: string;
     slug: string;
+    image: string;
+    color: string;
+    description: string;
 };
 
 type Faq = {

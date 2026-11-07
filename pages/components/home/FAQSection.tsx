@@ -1,7 +1,17 @@
 import { useState } from "react";
 import Link from "next/link";
 
-export default function FAQSection({ faqs }) {
+type Faq = {
+    id: number;
+    question: string;
+    answer: string;
+}
+
+type PageProps = {
+    faqs: Faq[];
+};
+
+export default function FAQSection({ faqs = [] }: PageProps) {
     const [openIndex, setOpenIndex] = useState<number | null>(0);
 
     return (

@@ -30,7 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     product_id: product_id,
                 });
 
-                const user_id = authUser.sub;
+                const user_id: number = Number(authUser.sub);
 
                 const data = await getProducts(user_id);
 
@@ -68,17 +68,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
         }
 
+        type WishlistProductRow = {
+            product_id: number;
+            name: string;
+            slug: string;
+            category_id: number;
+            price: number;
+            mrp: number;
+            unit: string;
+            img: string;
+        };
+
         async function getProducts(user_id: number) {
-            const wishlists = await Wishlist.join(
+            const wishlists = (await Wishlist.join(
                 "products",
                 "wishlists.product_id",
                 "products.id",
                 {
                     "wishlists.user_id": user_id,
                 }
-            );
+            )) as WishlistProductRow[];
 
-            const data = wishlists.map((item) => ({
+            const data = (wishlists || []).map((item) => ({
                 id: item.product_id,
                 name: item.name,
                 slug: item.slug,
@@ -92,7 +103,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return data;
         }
 
-        const user_id = authUser.sub;
+        const user_id: number = Number(authUser.sub);
         const data = await getProducts(user_id);
 
         return res.status(200).json({

@@ -2,8 +2,23 @@ import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
 import { apiRequest } from "@/lib/client";
+import { GetServerSideProps } from "next";
 
-export async function getServerSideProps() {
+type Category = {
+    id: number;
+    name: string;
+    slug: string;
+    image: string;
+    color: string;
+    description: string;
+    count: number;
+};
+
+type PageProps = {
+    categories: Category[];
+};
+
+export const getServerSideProps: GetServerSideProps<PageProps> = async () => {
 
     try {
         const response = await apiRequest("categories");
@@ -23,7 +38,7 @@ export async function getServerSideProps() {
     }
 }
 
-export default function CategoriesPage({ categories }) {
+export default function CategoriesPage({ categories }: PageProps) {
 
     return (
         <>
@@ -109,7 +124,7 @@ export default function CategoriesPage({ categories }) {
                                     />
 
                                     <span className="absolute bottom-3 left-3 rounded-full bg-white/95 px-3 py-1.5 text-xs font-bold text-emerald-800 shadow-sm">
-                                        {category.count}
+                                        {category.count ?? ''}
                                     </span>
                                 </div>
 

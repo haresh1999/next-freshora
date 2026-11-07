@@ -2,7 +2,34 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
 
-export default function FeaturedProducts({ products = [], categories = [] }) {
+type Product = {
+    id: number;
+    name: string;
+    slug: string;
+    category_id: number;
+    price: number;
+    mrp: number;
+    unit: string;
+    description: string;
+    img: string;
+    badge: string;
+    rating: number;
+    reviews: number;
+    stock: number;
+};
+
+type Category = {
+    id: number;
+    name: string;
+    slug: string;
+};
+
+type PageProps = {
+    products: Product[];
+    categories: Category[];
+};
+
+export default function FeaturedProducts({ products = [], categories = [] }: PageProps) {
 
     const cats_slug = Object.fromEntries(
         categories.map((item) => [item.id, item.slug])

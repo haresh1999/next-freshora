@@ -2,7 +2,15 @@ import type { NextApiResponse } from "next";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export async function apiRequest(endpoint, options = {}) {
+export interface ApiRequestOptions extends Omit<RequestInit, "headers"> {
+    token?: string;
+    headers?: HeadersInit;
+}
+
+export async function apiRequest<T = any>(
+    endpoint: string,
+    options: ApiRequestOptions = {}
+): Promise<T> {
     if (!API_BASE_URL) {
         throw new Error("API URL is not configured in .env.local");
     }
@@ -24,7 +32,7 @@ export async function apiRequest(endpoint, options = {}) {
     );
 
     if (response.status === 204) {
-        return null;
+        return null as T;
     }
 
     const data = await response.json();
@@ -43,7 +51,11 @@ export function unknownMethod(res: NextApiResponse) {
     });
 }
 
-export function errorResponse(res: NextApiResponse, message: string, statusCode = 500) {
+export function errorResponse(
+    res: NextApiResponse,
+    message: string,
+    statusCode = 500
+) {
     return res.status(statusCode).json({
         success: false,
         message: message,
