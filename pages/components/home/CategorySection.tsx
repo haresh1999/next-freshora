@@ -1,68 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 
-const categories = [
-    {
-        name: "Fruits & Vegetables",
-        description: "Fresh from the farm",
-        slug: "fruits-vegetables",
-        image:
-            "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80",
-        color: "bg-green-50",
-    },
-    {
-        name: "Dairy & Eggs",
-        description: "Daily essentials",
-        slug: "dairy-eggs",
-        image:
-            "https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&w=500&q=80",
-        color: "bg-amber-50",
-    },
-    {
-        name: "Grocery & Staples",
-        description: "Stock up your pantry",
-        slug: "grocery-staples",
-        image: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=500&q=80",
-        color: "bg-orange-50",
-    },
-    {
-        name: "Snacks & Beverages",
-        description: "Treat yourself",
-        slug: "snacks-beverages",
-        image: "https://images.unsplash.com/photo-1604719312245-6d2c47114758?auto=format&fit=crop&w=500&q=80",
-        color: "bg-rose-50",
-    },
-    {
-        name: "Bakery",
-        description: "Freshly baked goodness",
-        slug: "bakery",
-        image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=500&q=80",
-        color: "bg-yellow-50",
-    },
-    {
-        name: "Personal Care",
-        description: "Care for yourself",
-        slug: "personal-care",
-        image: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=500&q=80",
-        color: "bg-pink-50",
-    },
-    {
-        name: "Household",
-        description: "Essentials for your home",
-        slug: "household",
-        image: "https://images.unsplash.com/photo-1563453392212-326f5e854473?auto=format&fit=crop&w=500&q=80",
-        color: "bg-blue-50",
-    },
-    {
-        name: "Baby Care",
-        description: "Little things, big care",
-        slug: "baby-care",
-        image: "https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=500&q=80",
-        color: "bg-purple-50",
-    },
-];
-
-export default function CategorySection() {
+export default function CategorySection({ categories }) {
     return (
         <section className="bg-white py-14 sm:py-16 lg:py-10">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -147,10 +86,10 @@ export default function CategorySection() {
                     </div>
 
                     <Link
-                        href="/shop"
+                        href="/categories"
                         className="inline-flex w-fit shrink-0 items-center justify-center rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-emerald-700"
                     >
-                        Explore Products →
+                        Explore Category →
                     </Link>
                 </div>
 

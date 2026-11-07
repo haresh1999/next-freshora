@@ -1,3 +1,4 @@
+import { apiRequest } from "@/lib/client";
 import Head from "next/head";
 import Link from "next/link";
 import { useState, SubmitEvent } from "react";
@@ -41,6 +42,7 @@ export default function Contact() {
 
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const [error, setError] = useState<string | null>(null)
+    const [success, setSuccess] = useState<string | null>(null)
     const [submitted, setSubmitted] = useState(false);
 
     async function onSubmit(event: SubmitEvent<HTMLFormElement>) {
@@ -54,28 +56,19 @@ export default function Contact() {
 
             const payload = form;
 
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/contact`,
-                {
-                    method: "POST",
-                    headers: {
-                        Accept: "application/json",
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(payload),
-                }
-            );
+            const response = await apiRequest(`/contact`, {
+                method: "POST",
+                body: JSON.stringify(payload),
+            });
 
-            const result = await response.json();
+            if (response.success) {
 
-            if (!response.ok) {
-                throw new Error(
-                    result.message || "Failed to submit your enquiry."
-                );
+                setSuccess(response.message);
+                setForm(initialForm);
+                setSubmitted(true);
+            } else {
+                setError(response.message);
             }
-
-            setForm(initialForm);
-            setSubmitted(true);
 
         } catch (err: unknown) {
             setError(
@@ -167,11 +160,31 @@ export default function Contact() {
                     </div>
                 </section>
 
+
                 {/* Form and help panel */}
                 <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-10 lg:px-8">
                     <div className="grid items-start gap-8 lg:grid-cols-[1.3fr_0.7fr] lg:gap-12">
                         {/* Contact form */}
+
                         <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8 lg:p-10">
+                            {error && (
+                                <div
+                                    role="alert"
+                                    className="rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-700 mb-5"
+                                >
+                                    {error}
+                                </div>
+                            )}
+
+                            {success && (
+                                <div
+                                    role="status"
+                                    className="rounded-xl bg-emerald-50 px-4 py-4 text-sm leading-6 text-emerald-800 mb-5"
+                                >
+                                    {success}
+                                </div>
+                            )}
+
                             <div className="mb-8">
                                 <span className="text-sm font-bold uppercase tracking-widest text-emerald-700">
                                     Send a message

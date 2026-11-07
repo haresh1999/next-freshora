@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function HeroSection() {
     return (
-        <section className="overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-lime-50">
+        <section className="overflow-hidden bg-linear-to-br from-emerald-50 via-white to-lime-50">
             <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
 
                 <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-12">

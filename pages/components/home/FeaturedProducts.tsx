@@ -2,58 +2,14 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
 
-const products = [
-    {
-        id: 1,
-        name: "Fresh Red Apples",
-        category: "Fresh Fruits",
-        category_slug: "fresh-Fruits",
-        price: 149,
-        oldPrice: 180,
-        unit: "1 kg",
-        badge: "Bestseller",
-        image:
-            "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-        id: 2,
-        name: "Fresh Organic Milk",
-        category: "Dairy & Eggs",
-        category_slug: "dairy-eggs",
-        price: 64,
-        oldPrice: 72,
-        unit: "1 litre",
-        badge: "Fresh",
-        image:
-            "https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-        id: 3,
-        name: "Whole Wheat Bread",
-        category: "Bakery",
-        category_slug: "bakery",
-        price: 45,
-        oldPrice: 55,
-        unit: "400 g",
-        badge: "Popular",
-        image:
-            "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-        id: 4,
-        name: "Fresh Green Broccoli",
-        category: "Vegetables",
-        category_slug: "vegetables",
-        price: 79,
-        oldPrice: 99,
-        unit: "500 g",
-        badge: "Healthy",
-        image:
-            "https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?auto=format&fit=crop&w=600&q=80",
-    },
-];
+export default function FeaturedProducts({ products = [], categories = [] }) {
 
-export default function FeaturedProducts() {
+    const cats_slug = Object.fromEntries(
+        categories.map((item) => [item.id, item.slug])
+    );
+    const cats_name = Object.fromEntries(
+        categories.map((item) => [item.id, item.name])
+    );
 
     const { addToCart } = useCart();
 
@@ -100,7 +56,7 @@ export default function FeaturedProducts() {
                                     <Image
                                         width={284}
                                         height={284}
-                                        src={product.image}
+                                        src={product.img}
                                         alt={product.name || "Product image"}
                                         loading="lazy"
                                         className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
@@ -122,9 +78,9 @@ export default function FeaturedProducts() {
 
                             {/* Product details */}
                             <div className="p-3 sm:p-4">
-                                <Link href={`/categories/${product.category_slug}`}>
+                                <Link href={`/categories/${cats_slug[product.category_id]}`}>
                                     <p className="text-xs font-medium text-slate-400">
-                                        {product.category}
+                                        {cats_name[product.category_id]}
                                     </p>
                                 </Link>
                                 <Link href={`/product/${product.name
@@ -146,7 +102,7 @@ export default function FeaturedProducts() {
                                             ₹{product.price}
                                         </span>
                                         <span className="text-xs text-slate-400 line-through">
-                                            ₹{product.oldPrice}
+                                            ₹{product.mrp}
                                         </span>
                                     </div>
 
@@ -161,7 +117,7 @@ export default function FeaturedProducts() {
                                                     .toLowerCase()
                                                     .replace(/\s+/g, "-"),
                                                 price: product.price,
-                                                image: product.image,
+                                                image: product.img,
                                                 unit: product.unit,
                                             })
                                         }}

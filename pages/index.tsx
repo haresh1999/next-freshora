@@ -3,8 +3,73 @@ import CategorySection from "./components/home/CategorySection";
 import FeaturedProducts from "./components/home/FeaturedProducts";
 import FAQSection from "./components/home/FAQSection";
 import Head from "next/head";
+import { apiRequest } from "@/lib/client";
+import { GetServerSideProps } from "next";
 
-export default function Home() {
+type Product = {
+    id: number;
+    name: string;
+    slug: string;
+    category_id: number;
+    price: number;
+    mrp: number;
+    unit: string;
+    description: string;
+    img: string;
+    badge: string;
+    rating: number;
+    reviews: number;
+    stock: number;
+};
+
+type Category = {
+    id: number;
+    name: string;
+    slug: string;
+};
+
+type Faq = {
+    id: number;
+    question: string;
+    answer: string;
+}
+
+type PageProps = {
+    products: Product[];
+    categories: Category[];
+    faqs: Faq[];
+};
+
+export const getServerSideProps: GetServerSideProps<PageProps> = async () => {
+
+    try {
+
+        const [product, category, faq] = await Promise.all([
+            apiRequest('/products', { method: 'GET' }),
+            apiRequest('/categories', { method: 'GET' }),
+            apiRequest('/faqs', { method: 'GET' }),
+        ]);
+
+        return {
+            props: {
+                products: product?.data || [],
+                categories: category?.data || [],
+                faqs: faq?.data || [],
+            },
+        };
+    } catch (error) {
+        console.error('Failed to fetch products:', error);
+        return {
+            props: {
+                products: [],
+                categories: [],
+                faqs: [],
+            },
+        };
+    }
+}
+
+export default function Home({ products, categories, faqs }: PageProps) {
     return (
         <>
             <Head>
@@ -27,9 +92,9 @@ export default function Home() {
                     Explore Products →
                 </a>
             </div>
-            <CategorySection />
-            <FeaturedProducts />
-            <FAQSection />
+            <CategorySection categories={categories} />
+            <FeaturedProducts products={products} categories={categories} />
+            <FAQSection faqs={faqs} />
         </>
     )
 }

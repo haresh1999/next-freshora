@@ -1,29 +1,7 @@
 import { useState } from "react";
+import Link from "next/link";
 
-const faqs = [
-    {
-        question: "How do I place an order on Freshora?",
-        answer: "Browse our products, add your favourite items to the cart, and proceed to checkout. Enter your delivery details, select an available payment method, and confirm your order.",
-    },
-    {
-        question: "How long does delivery take?",
-        answer: "Delivery time depends on your location and the available delivery slots. You can check the estimated delivery time during checkout before confirming your order.",
-    },
-    {
-        question: "What payment methods do you accept?",
-        answer: "Available payment methods will be displayed at checkout. Depending on your setup, these may include UPI, debit or credit cards, net banking, and cash on delivery.",
-    },
-    {
-        question: "Can I cancel or modify my order?",
-        answer: "Please contact our support team as soon as possible if you need to cancel or change an order. Whether a change is possible depends on the order's current status.",
-    },
-    {
-        question: "What should I do if an item is damaged or missing?",
-        answer: "Contact our customer support team with your order number and details of the issue. Our team can review the order and help you with the next steps.",
-    },
-];
-
-export default function FAQSection() {
+export default function FAQSection({ faqs }) {
     const [openIndex, setOpenIndex] = useState<number | null>(0);
 
     return (
@@ -98,10 +76,7 @@ export default function FAQSection() {
                                 </button>
 
                                 {isOpen && (
-                                    <div
-                                        id={`faq-answer-${index}`}
-                                        className="px-5 pb-5 pl-16 sm:px-6 sm:pb-6 sm:pl-[4.5rem]"
-                                    >
+                                    <div id={`faq-answer-${index}`} className="px-5 pb-5 pl-16 sm:px-6 sm:pb-6 sm:pl-18">
                                         <p className="text-sm leading-7 text-slate-500">
                                             {faq.answer}
                                         </p>
@@ -122,12 +97,12 @@ export default function FAQSection() {
                         Our team is here to help with your Freshora shopping experience.
                     </p>
 
-                    <a
-                        href="/contact"
+                    <Link
+                        href={"/contact"}
                         className="mt-5 inline-flex items-center justify-center rounded-xl bg-white px-6 py-3 text-sm font-bold text-emerald-800 transition hover:bg-emerald-50"
                     >
                         Contact Support <span className="ml-2">→</span>
-                    </a>
+                    </Link>
                 </div>
             </div>
         </section>
